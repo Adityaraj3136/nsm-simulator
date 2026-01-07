@@ -468,10 +468,12 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
+    const [resetAccessKey, setResetAccessKey] = useState('');
     const [resetPassword, setResetPassword] = useState('');
     const [resetConfirmPassword, setResetConfirmPassword] = useState('');
     const [resetError, setResetError] = useState('');
     const [resetSuccess, setResetSuccess] = useState('');
+    const [resetStep, setResetStep] = useState('key'); // 'key' or 'password'
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -499,6 +501,21 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
         setResetError('');
         setResetSuccess('');
 
+        if (resetStep === 'key') {
+            // Verify access key
+            const storedKey = localStorage.getItem('nms_reset_key') || 'reset123';
+            if (resetAccessKey !== storedKey) {
+                setResetError('Invalid access key');
+                setResetAccessKey('');
+                return;
+            }
+            // Move to password reset step
+            setResetStep('password');
+            setResetAccessKey('');
+            return;
+        }
+
+        // Password reset
         if (!resetPassword || resetPassword.length < 6) {
             setResetError('Password must be at least 6 characters long');
             return;
@@ -529,6 +546,7 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
             setTimeout(() => {
                 setShowPasswordResetModal(false);
                 setResetSuccess('');
+                setResetStep('key');
             }, 3000);
         } catch (error) {
             setResetError('Error resetting password: ' + error.message);
@@ -612,54 +630,98 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
             {showPasswordResetModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md" onClick={() => setShowPasswordResetModal(false)}>
                     <GlassPanel className="w-full max-w-md p-4 sm:p-6 md:p-8 mx-auto" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">Reset Admin Password</h2>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+                            {resetStep === 'key' ? 'Verify Access Key' : 'Reset Admin Password'}
+                        </h2>
                         <form onSubmit={handleResetPasswordSubmit} className="space-y-4 sm:space-y-6">
-                            <div>
-                                <label className="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">New Password</label>
-                                <input
-                                    type="password"
-                                    value={resetPassword}
-                                    onChange={(e) => setResetPassword(e.target.value)}
-                                    className="w-full p-2 sm:p-3 bg-gray-200/50 dark:bg-black/30 border border-cyan-500/20 dark:border-cyan-300/20 rounded-lg focus:outline-none transition text-sm sm:text-base"
-                                    placeholder="••••••••"
-                                    minLength="6"
-                                />
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Minimum 6 characters</p>
-                            </div>
-                            <div>
-                                <label className="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Confirm Password</label>
-                                <input
-                                    type="password"
-                                    value={resetConfirmPassword}
-                                    onChange={(e) => setResetConfirmPassword(e.target.value)}
-                                    className="w-full p-2 sm:p-3 bg-gray-200/50 dark:bg-black/30 border border-cyan-500/20 dark:border-cyan-300/20 rounded-lg focus:outline-none transition text-sm sm:text-base"
-                                    placeholder="••••••••"
-                                    minLength="6"
-                                />
-                            </div>
-                            {resetError && <p className="text-red-500 text-xs sm:text-sm text-center">{resetError}</p>}
-                            {resetSuccess && <p className="text-green-500 text-xs sm:text-sm text-center">{resetSuccess}</p>}
-                            <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowPasswordResetModal(false);
-                                        setResetPassword('');
-                                        setResetConfirmPassword('');
-                                        setResetError('');
-                                        setResetSuccess('');
-                                    }}
-                                    className="flex-1 p-2 sm:p-3 bg-gray-500/20 hover:bg-gray-500/30 text-gray-700 dark:text-gray-300 font-bold text-sm sm:text-base rounded-lg transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-1 p-2 sm:p-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm sm:text-base rounded-lg hover:opacity-90 transition-opacity"
-                                >
-                                    Reset Password
-                                </button>
-                            </div>
+                            {resetStep === 'key' ? (
+                                // Access Key Step
+                                <>
+                                    <div>
+                                        <label className="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Access Key</label>
+                                        <input
+                                            type="password"
+                                            value={resetAccessKey}
+                                            onChange={(e) => setResetAccessKey(e.target.value)}
+                                            className="w-full p-2 sm:p-3 bg-gray-200/50 dark:bg-black/30 border border-cyan-500/20 dark:border-cyan-300/20 rounded-lg focus:outline-none transition text-sm sm:text-base"
+                                            placeholder="Enter access key"
+                                            autoFocus
+                                        />
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Ask the system administrator for the access key</p>
+                                    </div>
+                                    {resetError && <p className="text-red-500 text-xs sm:text-sm text-center">{resetError}</p>}
+                                    <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowPasswordResetModal(false);
+                                                setResetAccessKey('');
+                                                setResetError('');
+                                                setResetStep('key');
+                                            }}
+                                            className="flex-1 p-2 sm:p-3 bg-gray-500/20 hover:bg-gray-500/30 text-gray-700 dark:text-gray-300 font-bold text-sm sm:text-base rounded-lg transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="flex-1 p-2 sm:p-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm sm:text-base rounded-lg hover:opacity-90 transition-opacity"
+                                        >
+                                            Verify
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                // Password Reset Step
+                                <>
+                                    <div>
+                                        <label className="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">New Password</label>
+                                        <input
+                                            type="password"
+                                            value={resetPassword}
+                                            onChange={(e) => setResetPassword(e.target.value)}
+                                            className="w-full p-2 sm:p-3 bg-gray-200/50 dark:bg-black/30 border border-cyan-500/20 dark:border-cyan-300/20 rounded-lg focus:outline-none transition text-sm sm:text-base"
+                                            placeholder="••••••••"
+                                            minLength="6"
+                                            autoFocus
+                                        />
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Minimum 6 characters</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Confirm Password</label>
+                                        <input
+                                            type="password"
+                                            value={resetConfirmPassword}
+                                            onChange={(e) => setResetConfirmPassword(e.target.value)}
+                                            className="w-full p-2 sm:p-3 bg-gray-200/50 dark:bg-black/30 border border-cyan-500/20 dark:border-cyan-300/20 rounded-lg focus:outline-none transition text-sm sm:text-base"
+                                            placeholder="••••••••"
+                                            minLength="6"
+                                        />
+                                    </div>
+                                    {resetError && <p className="text-red-500 text-xs sm:text-sm text-center">{resetError}</p>}
+                                    {resetSuccess && <p className="text-green-500 text-xs sm:text-sm text-center">{resetSuccess}</p>}
+                                    <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setResetPassword('');
+                                                setResetConfirmPassword('');
+                                                setResetError('');
+                                                setResetStep('key');
+                                            }}
+                                            className="flex-1 p-2 sm:p-3 bg-gray-500/20 hover:bg-gray-500/30 text-gray-700 dark:text-gray-300 font-bold text-sm sm:text-base rounded-lg transition-colors"
+                                        >
+                                            Back
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            className="flex-1 p-2 sm:p-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-sm sm:text-base rounded-lg hover:opacity-90 transition-opacity"
+                                        >
+                                            Reset Password
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </form>
                     </GlassPanel>
                 </div>
