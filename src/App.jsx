@@ -1472,7 +1472,7 @@ const DashboardView = ({ stats, bandwidthHistory, devices, loading = false, onSh
                             ))}
                         </div>
                          <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={filteredBandwidthHistory} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                            <LineChart data={filteredBandwidthHistory} margin={{ top: 5, right: 20, left: 40, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 255, 255, 0.1)" /><XAxis dataKey="name" stroke="#8884d8" fontSize={12} /><YAxis stroke="#8884d8" fontSize={12} unit="Mbps"/><Tooltip contentStyle={{ backgroundColor: 'rgba(10, 25, 47, 0.8)', border: '1px solid #00ffff' }} /><Legend /><Line type="monotone" dataKey="ingress" stroke="#8884d8" strokeWidth={2} dot={false} activeDot={{ r: 8 }}/><Line type="monotone" dataKey="egress" stroke="#82ca9d" strokeWidth={2} dot={false}/>
                             </LineChart>
                         </ResponsiveContainer>
@@ -5085,7 +5085,7 @@ function App() {
     const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
     const [showSpeedTestModal, setShowSpeedTestModal] = useState(false);
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-    const [showWelcomeModal, setShowWelcomeModal] = useState(() => !localStorage.getItem('nms_visited'));
+    const [showWelcomeModal, setShowWelcomeModal] = useState(true);
     const [rebootingDevice, setRebootingDevice] = useState(null);
     const [updatingFirmwareDevice, setUpdatingFirmwareDevice] = useState(null);
     const [activeView, setActiveView] = useState('dashboard');
@@ -5253,12 +5253,7 @@ function App() {
         }));
     }, [devices, alerts, isAuthenticated]);
     
-    // Mark as visited when welcome modal is closed
-    useEffect(() => {
-        if (!showWelcomeModal) {
-            localStorage.setItem('nms_visited', 'true');
-        }
-    }, [showWelcomeModal]);
+    // Welcome modal now shows on every reload - removed localStorage persistence
 
     // Brute force protection timer
     useEffect(() => {
