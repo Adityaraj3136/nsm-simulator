@@ -469,6 +469,7 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
     const [error, setError] = useState('');
     const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
     const [showHelpModal, setShowHelpModal] = useState(false);
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
     const [resetAccessKey, setResetAccessKey] = useState('');
     const [resetPassword, setResetPassword] = useState('');
     const [resetConfirmPassword, setResetConfirmPassword] = useState('');
@@ -615,15 +616,14 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                     Made with <span className="text-red-500">❤️</span> by <span className="font-semibold text-cyan-600 dark:text-cyan-400">Aditya Raj</span>
                 </p>
-                <a 
-                    href="https://adityaraj3136.github.io/contact/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
+                <button
+                    type="button"
+                    onClick={() => setShowFeedbackModal(true)}
                     className="text-xs text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-1"
                 >
                     <Icon name="help" className="w-3 h-3" />
                     Report Issue / Feedback
-                </a>
+                </button>
             </div>
             </GlassPanel>
 
@@ -755,6 +755,29 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
                             src="https://adityaraj3136.github.io/contact/"
                             className="flex-1 w-full border-0"
                             title="Contact Administrator"
+                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Feedback Modal with Contact Page */}
+            {showFeedbackModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-md" onClick={() => setShowFeedbackModal(false)}>
+                    <div className="w-full max-w-2xl h-[80vh] sm:h-[90vh] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-cyan-500/20 overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-cyan-500/20 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100">Report Issue / Send Feedback</h3>
+                            <button 
+                                onClick={() => setShowFeedbackModal(false)} 
+                                className="p-1 sm:p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-lg transition-colors"
+                            >
+                                <Icon name="x" className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                            </button>
+                        </div>
+                        <iframe
+                            src="https://adityaraj3136.github.io/contact/"
+                            className="flex-1 w-full border-0"
+                            title="Report Issue / Send Feedback"
                             sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                         />
                     </div>
