@@ -8,4 +8,10 @@ export default {
     extend: {},
   },
   plugins: [],
+  corePlugins: {
+    outline: false,
+    ringOpacity: false,
+    ringColor: false,
+    ringWidth: false,
+  },
 }

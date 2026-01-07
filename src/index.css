@@ -10,3 +10,27 @@ html.dark {
 html:not(.dark) {
   color-scheme: light;
 }
+
+/* Remove default focus outline and prevent white borders on click */
+* {
+  outline: none !important;
+}
+
+*:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(0, 255, 255, 0.5) !important;
+  outline-offset: 2px !important;
+}
+
+/* Specifically for interactive elements - no focus outline unless focus-visible */
+button, input, select, textarea, a {
+  outline: none !important;
+}
+
+button:focus, input:focus, select:focus, textarea:focus, a:focus {
+  outline: none !important;
+}
