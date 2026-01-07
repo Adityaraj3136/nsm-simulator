@@ -468,6 +468,7 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
+    const [showHelpModal, setShowHelpModal] = useState(false);
     const [resetAccessKey, setResetAccessKey] = useState('');
     const [resetPassword, setResetPassword] = useState('');
     const [resetConfirmPassword, setResetConfirmPassword] = useState('');
@@ -647,7 +648,17 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
                                             placeholder="Enter access key"
                                             autoFocus
                                         />
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Ask the system administrator for the access key</p>
+                                        <div className="flex items-center justify-between mt-1">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Ask the system administrator for the access key</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowHelpModal(true)}
+                                                className="text-xs text-cyan-600 dark:text-cyan-400 hover:underline ml-2 flex-shrink-0"
+                                                title="Contact administrator"
+                                            >
+                                                Need help?
+                                            </button>
+                                        </div>
                                     </div>
                                     {resetError && <p className="text-red-500 text-xs sm:text-sm text-center">{resetError}</p>}
                                     <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
@@ -724,6 +735,29 @@ const LoginPanel = ({ onLogin, isLocked, lockTimeRemaining, onToggleTheme, isDar
                             )}
                         </form>
                     </GlassPanel>
+                </div>
+            )}
+
+            {/* Help Modal with Contact Page */}
+            {showHelpModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-md" onClick={() => setShowHelpModal(false)}>
+                    <div className="w-full max-w-2xl h-[80vh] sm:h-[90vh] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-cyan-500/20 overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-cyan-500/20 bg-gradient-to-r from-cyan-500/10 to-blue-500/10">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100">Contact Administrator</h3>
+                            <button 
+                                onClick={() => setShowHelpModal(false)} 
+                                className="p-1 sm:p-2 hover:bg-black/10 dark:hover:bg-white/10 rounded-lg transition-colors"
+                            >
+                                <Icon name="x" className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                            </button>
+                        </div>
+                        <iframe
+                            src="https://adityaraj3136.github.io/contact/"
+                            className="flex-1 w-full border-0"
+                            title="Contact Administrator"
+                            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                        />
+                    </div>
                 </div>
             )}
         </div>
