@@ -340,7 +340,7 @@ const verifyTOTP = async (secret, token, timeStep = 30) => {
 
 // --- UI Components ---
 
-const MFAVerificationPanel = ({ onVerify, onCancel, onReset }) => {
+const MFAVerificationPanel = ({ onVerify, onCancel, onReset, isLocked = false, lockTimeRemaining = 0 }) => {
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -350,6 +350,10 @@ const MFAVerificationPanel = ({ onVerify, onCancel, onReset }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        if (isLocked) {
+            setError(`Locked. Try again in ${lockTimeRemaining}s.`);
+            return;
+        }
         if (!code || code.length !== 6) {
             setError('Please enter a 6-digit code.');
             return;
@@ -402,6 +406,9 @@ const MFAVerificationPanel = ({ onVerify, onCancel, onReset }) => {
                         />
                     </div>
                     {error && <p className="text-red-500 text-xs sm:text-sm text-center">{error}</p>}
+                    {isLocked && !error && (
+                        <p className="text-red-500 text-xs sm:text-sm text-center">Locked. Try again in {lockTimeRemaining}s.</p>
+                    )}
                     <div className="flex gap-2 sm:gap-3">
                         <button 
                             type="button" 
@@ -413,7 +420,7 @@ const MFAVerificationPanel = ({ onVerify, onCancel, onReset }) => {
                         </button>
                         <button 
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || isLocked}
                             className="flex-1 p-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
                         >
                             {loading ? 'Verifying...' : 'Verify'}
@@ -6109,6 +6116,11 @@ function App() {
     const [loginAttempts, setLoginAttempts] = useState(0);
     const [isLoginLocked, setIsLoginLocked] = useState(false);
     const [lockTimeRemaining, setLockTimeRemaining] = useState(0);
+
+    // MFA brute force protection
+    const [mfaAttempts, setMfaAttempts] = useState(0);
+    const [isMfaLocked, setIsMfaLocked] = useState(false);
+    const [mfaLockTimeRemaining, setMfaLockTimeRemaining] = useState(0);
     
     const [devices, setDevices] = useState(initialDevices);
     const [bandwidthHistory, setBandwidthHistory] = useState(initialBandwidthData);
@@ -6287,6 +6299,23 @@ function App() {
         }
     }, [isLoginLocked, lockTimeRemaining]);
 
+    // MFA brute force protection timer
+    useEffect(() => {
+        if (isMfaLocked && mfaLockTimeRemaining > 0) {
+            const timer = setInterval(() => {
+                setMfaLockTimeRemaining(prev => {
+                    if (prev <= 1) {
+                        setIsMfaLocked(false);
+                        setMfaAttempts(0);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(timer);
+        }
+    }, [isMfaLocked, mfaLockTimeRemaining]);
+
     const handleLogin = async (username, password) => {
         // Check if locked
         if (isLoginLocked) {
@@ -6363,6 +6392,11 @@ function App() {
     };
 
     const handleMfaVerify = async (code) => {
+        if (isMfaLocked) {
+            toast.error(`MFA locked. Try again in ${mfaLockTimeRemaining}s`);
+            return false;
+        }
+
         // Retrieve secret for the temporary user trying to login
         const mfaSecret = localStorage.getItem(`mfaSecret_${tempMfaUser.username}`);
         
@@ -6376,6 +6410,11 @@ function App() {
         const isValid = await verifyTOTP(mfaSecret, code);
         
         if (isValid) {
+            // Reset MFA attempt counter on success
+            setMfaAttempts(0);
+            setIsMfaLocked(false);
+            setMfaLockTimeRemaining(0);
+
             // MFA verified successfully
             setIsAuthenticated(true);
             setCurrentUser(tempMfaUser);
@@ -6395,6 +6434,14 @@ function App() {
             logAudit('mfa_verified', { user: tempMfaUser.username });
             return true;
         }
+
+        const attempts = mfaAttempts + 1;
+        setMfaAttempts(attempts);
+        if (attempts >= 5) {
+            setIsMfaLocked(true);
+            setMfaLockTimeRemaining(15 * 60); // 15 minutes
+            toast.error('Too many MFA attempts. MFA locked for 15 minutes.');
+        }
         return false;
     };
 
@@ -6402,6 +6449,9 @@ function App() {
         setWaitingForMfa(false);
         setTempMfaUser(null);
         setTempMfaRole(null);
+        setMfaAttempts(0);
+        setIsMfaLocked(false);
+        setMfaLockTimeRemaining(0);
     };
 
     const handleMfaReset = () => {
@@ -6578,6 +6628,8 @@ function App() {
                                 onVerify={handleMfaVerify} 
                                 onCancel={handleMfaCancel}
                                 onReset={handleMfaReset}
+                                isLocked={isMfaLocked}
+                                lockTimeRemaining={mfaLockTimeRemaining}
                             />
                         ) : (
                             <LoginPanel onLogin={handleLogin} isLocked={isLoginLocked} lockTimeRemaining={lockTimeRemaining} onToggleTheme={handleThemeChange} isDarkMode={settings.theme === 'dark'} />
