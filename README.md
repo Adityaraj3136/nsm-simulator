@@ -253,8 +253,8 @@ Events logged:
 ## 🤝 **Support**
 
 - **Feedback**: https://adityaraj3136.github.io/contact/
-- **GitHub**: @aditya-raj
-- **Email**: adityaraj3136@gmail.com
+- **GitHub**: @adityaraj3136
+- **Email**: info.adityaraj3136@gmail.com
 
 ## 📄 **License**
 
