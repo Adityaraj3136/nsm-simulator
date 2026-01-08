@@ -340,7 +340,7 @@ const verifyTOTP = async (secret, token, timeStep = 30) => {
 
 // --- UI Components ---
 
-const MFAVerificationPanel = ({ onVerify, onCancel, onReset, isLocked = false, lockTimeRemaining = 0 }) => {
+const MFAVerificationPanel = ({ onVerify, onCancel, onReset, isLocked = false, lockTimeRemaining = 0, attemptsUsed = 0, maxAttempts = 5 }) => {
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -408,6 +408,11 @@ const MFAVerificationPanel = ({ onVerify, onCancel, onReset, isLocked = false, l
                     {error && <p className="text-red-500 text-xs sm:text-sm text-center">{error}</p>}
                     {isLocked && !error && (
                         <p className="text-red-500 text-xs sm:text-sm text-center">Locked. Try again in {lockTimeRemaining}s.</p>
+                    )}
+                    {!isLocked && (
+                        <p className="text-xs sm:text-sm text-center text-gray-600 dark:text-gray-400">
+                            Attempts left: {Math.max(maxAttempts - attemptsUsed, 0)} / {maxAttempts}
+                        </p>
                     )}
                     <div className="flex gap-2 sm:gap-3">
                         <button 
@@ -6117,6 +6122,8 @@ function App() {
     const [isLoginLocked, setIsLoginLocked] = useState(false);
     const [lockTimeRemaining, setLockTimeRemaining] = useState(0);
 
+    const MFA_MAX_ATTEMPTS = 5;
+
     // MFA brute force protection
     const [mfaAttempts, setMfaAttempts] = useState(0);
     const [isMfaLocked, setIsMfaLocked] = useState(false);
@@ -6437,7 +6444,7 @@ function App() {
 
         const attempts = mfaAttempts + 1;
         setMfaAttempts(attempts);
-        if (attempts >= 5) {
+        if (attempts >= MFA_MAX_ATTEMPTS) {
             setIsMfaLocked(true);
             setMfaLockTimeRemaining(15 * 60); // 15 minutes
             toast.error('Too many MFA attempts. MFA locked for 15 minutes.');
@@ -6630,6 +6637,8 @@ function App() {
                                 onReset={handleMfaReset}
                                 isLocked={isMfaLocked}
                                 lockTimeRemaining={mfaLockTimeRemaining}
+                                attemptsUsed={mfaAttempts}
+                                maxAttempts={MFA_MAX_ATTEMPTS}
                             />
                         ) : (
                             <LoginPanel onLogin={handleLogin} isLocked={isLoginLocked} lockTimeRemaining={lockTimeRemaining} onToggleTheme={handleThemeChange} isDarkMode={settings.theme === 'dark'} />
