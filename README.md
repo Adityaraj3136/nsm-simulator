@@ -10,6 +10,12 @@ A comprehensive, modern web-based **Network Management System (NMS)** dashboard 
 - Device grouping/tags for bulk visibility and a richer user/role manager (add, edit, disable, protect admin)
 - Audit log viewer with one-click clear and in-app feedback/report issue entry point
 
+### UI polish (Jan 8, 2026)
+- Light-mode network topology now uses high-contrast backgrounds and strokes for readability
+- Dropdowns restyled (light/dark) and global scrollbars hidden while keeping scroll behavior
+- Device Groups modal and Groups/Policies panels keep the form fixed while lists scroll independently
+- Charts enforce a minimum height to avoid zero-dimension Recharts warnings
+
 ## 🌟 Features
 
 ### 🔐 **Security & Authentication**

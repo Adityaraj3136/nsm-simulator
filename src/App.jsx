@@ -1390,7 +1390,7 @@ const ChartSkeleton = () => (
 const ChartCard = ({ title, children, loading = false }) => (
   <GlassPanel className="p-4 flex flex-col min-h-96">
     <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">{title}</h3>
-    <div className="flex-1 w-full">
+    <div className="flex-1 w-full min-h-[300px]">
         {loading ? <ChartSkeleton /> : children}
     </div>
   </GlassPanel>
@@ -1538,15 +1538,38 @@ const NetworkTopologyMap = ({ devices = [] }) => {
         {x: 700, y: 300, label: 'SRV-02', type: 'server'}
     ];
     
+    const isDark = document.documentElement.classList.contains('dark');
+    
+    const colors = {
+        bgNode: isDark ? '#0d1f2d' : '#f0f9ff',
+        strokeLight: isDark ? '#00ffff' : '#0ea5e9',
+        strokeLight30: isDark ? 'rgba(0, 255, 255, 0.3)' : 'rgba(6, 182, 212, 0.3)',
+        textLabel: isDark ? '#cccccc' : '#374151',
+        textDevice: isDark ? '#e0e0e0' : '#4b5563',
+        tooltipBg: isDark ? '#1a1a2e' : '#f8fafc',
+        tooltipStroke: isDark ? '#e0e0e0' : '#94a3b8'
+    };
+
     return (
         <GlassPanel className="p-4 h-[300px] md:h-[500px] overflow-hidden relative">
             <h3 className="text-lg md:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Network Topology</h3>
             <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Hover over nodes to see device mapping</div>
             <svg width="100%" height="100%" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet" className="w-full h-full">
-                <defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0, 255, 255, 0.05)" strokeWidth="0.5"/></pattern></defs>
+                <defs>
+                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke={isDark ? "rgba(0, 255, 255, 0.05)" : "rgba(0, 149, 218, 0.08)"} strokeWidth="0.5"/>
+                    </pattern>
+                </defs>
                 <rect width="100%" height="100%" fill="url(#grid)" />
-                <g className="connections opacity-40">
-                    <line x1="100" y1="200" x2="250" y2="100" stroke="#00ffff" strokeWidth="2" /><line x1="100" y1="200" x2="250" y2="300" stroke="#00ffff" strokeWidth="2" /><line x1="250" y1="100" x2="400" y2="100" stroke="#00ffff" strokeWidth="2" /><line x1="250" y1="300" x2="400" y2="300" stroke="#00ffff" strokeWidth="2" /><line x1="400" y1="100" x2="550" y2="200" stroke="#00ffff" strokeWidth="2" /><line x1="400" y1="300" x2="550" y2="200" stroke="#00ffff" strokeWidth="2" /><line x1="550" y1="200" x2="700" y2="100" stroke="#00ffff" strokeWidth="2" /><line x1="550" y1="200" x2="700" y2="300" stroke="#00ffff" strokeWidth="2" />
+                <g className="connections opacity-50">
+                    <line x1="100" y1="200" x2="250" y2="100" stroke={colors.strokeLight} strokeWidth="2" />
+                    <line x1="100" y1="200" x2="250" y2="300" stroke={colors.strokeLight} strokeWidth="2" />
+                    <line x1="250" y1="100" x2="400" y2="100" stroke={colors.strokeLight} strokeWidth="2" />
+                    <line x1="250" y1="300" x2="400" y2="300" stroke={colors.strokeLight} strokeWidth="2" />
+                    <line x1="400" y1="100" x2="550" y2="200" stroke={colors.strokeLight} strokeWidth="2" />
+                    <line x1="400" y1="300" x2="550" y2="200" stroke={colors.strokeLight} strokeWidth="2" />
+                    <line x1="550" y1="200" x2="700" y2="100" stroke={colors.strokeLight} strokeWidth="2" />
+                    <line x1="550" y1="200" x2="700" y2="300" stroke={colors.strokeLight} strokeWidth="2" />
                 </g>
                 <circle cx="0" cy="0" r="4" fill="#39ff14"><animateMotion dur="3s" repeatCount="indefinite" path="M100,200 L250,100" /></circle>
                 <circle cx="0" cy="0" r="4" fill="#39ff14"><animateMotion dur="4s" repeatCount="indefinite" path="M250,300 L400,300" /></circle>
@@ -1564,18 +1587,18 @@ const NetworkTopologyMap = ({ devices = [] }) => {
                             onMouseEnter={() => setHoveredNode(node.label)}
                             onMouseLeave={() => setHoveredNode(null)}
                         >
-                            <circle cx="0" cy="0" r="25" fill="#0d1f2d" stroke={statusColor} strokeWidth={isHovered ? "3" : "2"} className="transition-all group-hover:stroke-yellow-400"/>
-                            <circle cx="0" cy="0" r={isHovered ? "32" : "28"} fill="transparent" stroke={statusColor} strokeWidth="1" strokeDasharray="4 4" className="opacity-30 group-hover:opacity-70 animate-spin-slow transition-all"/>
+                            <circle cx="0" cy="0" r="25" fill={colors.bgNode} stroke={statusColor} strokeWidth={isHovered ? "3" : "2"} className="transition-all group-hover:stroke-yellow-400"/>
+                            <circle cx="0" cy="0" r={isHovered ? "32" : "28"} fill="transparent" stroke={statusColor} strokeWidth="1" strokeDasharray="4 4" className="opacity-40 group-hover:opacity-70 transition-all" style={{animationName: 'spin', animationDuration: '3s', animationIterationCount: 'infinite', animationTimingFunction: 'linear'}}/>
                             {isHovered && (
                                 <>
-                                    <rect x="-60" y="-75" width="120" height="70" rx="8" fill="#1a1a2e" stroke={statusColor} strokeWidth="1.5" opacity="0.95"/>
-                                    <text x="0" y="-60" textAnchor="middle" fill={statusColor} fontSize="11" className="font-bold">{node.label}</text>
-                                    <text x="0" y="-45" textAnchor="middle" fill="#e0e0e0" fontSize="9">{deviceName}</text>
-                                    <text x="0" y="-30" textAnchor="middle" fill={statusColor} fontSize="9">{getStatusText(status)}</text>
+                                    <rect x="-65" y="-80" width="130" height="75" rx="8" fill={colors.tooltipBg} stroke={statusColor} strokeWidth="1.5" opacity="0.95"/>
+                                    <text x="0" y="-63" textAnchor="middle" fill={statusColor} fontSize="11" fontWeight="bold">{node.label}</text>
+                                    <text x="0" y="-48" textAnchor="middle" fill={colors.textDevice} fontSize="8">{deviceName}</text>
+                                    <text x="0" y="-32" textAnchor="middle" fill={statusColor} fontSize="9">{getStatusText(status)}</text>
                                 </>
                             )}
-                            <text x="0" y="4" textAnchor="middle" fill="#e0e0e0" fontSize="10" className="font-sans">{node.type.charAt(0).toUpperCase()}</text>
-                            <text x="0" y="45" textAnchor="middle" fill="#cccccc" fontSize="12" className="font-semibold tracking-wider group-hover:fill-white">{node.label}</text>
+                            <text x="0" y="4" textAnchor="middle" fill={colors.textDevice} fontSize="10" fontFamily="sans-serif">{node.type.charAt(0).toUpperCase()}</text>
+                            <text x="0" y="45" textAnchor="middle" fill={colors.textLabel} fontSize="12" fontWeight="600" letterSpacing="0.05em" className="group-hover:opacity-100">{node.label}</text>
                         </g>
                     );
                 })}
@@ -1768,37 +1791,532 @@ const DnsRecordForm = ({ onSave, onCancel }) => {
     );
 };
 
-const DnsView = ({ records, onAddRecord, onDeleteRecord, userRole = 'admin' }) => {
-    const [showAddForm, setShowAddForm] = useState(false);
+const DnsView = ({ userRole = 'admin' }) => {
     const isReadOnly = userRole === 'viewer';
-    const handleSave = (record) => { onAddRecord(record); setShowAddForm(false); };
+    const [zones, setZones] = useState(() => {
+        try {
+            const saved = localStorage.getItem('dnsZones');
+            if (saved) return JSON.parse(saved);
+        } catch {}
+        return [
+            {
+                name: 'example.com',
+                type: 'forward',
+                defaultTTL: 3600,
+                soa: { primaryNs: 'ns1.example.com', adminEmail: 'admin.example.com', serial: 2026010801, refresh: 3600, retry: 900, expire: 1209600, minimum: 300 },
+                ns: ['ns1.example.com', 'ns2.example.com'],
+                settings: { transferACL: ['192.168.1.1'], tsigKeys: [], views: [], rpz: [] },
+                records: [
+                    { id: 1, type: 'A', name: 'example.com', value: '192.0.2.1', ttl: 3600 },
+                    { id: 2, type: 'AAAA', name: 'example.com', value: '2001:0db8::1', ttl: 3600 },
+                    { id: 3, type: 'CNAME', name: 'www', value: 'example.com', ttl: 3600 },
+                    { id: 4, type: 'MX', name: 'example.com', preference: 10, exchange: 'mail.example.com', ttl: 7200 },
+                    { id: 5, type: 'TXT', name: 'example.com', value: 'v=spf1 mx -all', ttl: 3600 },
+                ],
+            },
+            {
+                name: '1.168.192.in-addr.arpa',
+                type: 'reverse',
+                defaultTTL: 3600,
+                soa: { primaryNs: 'ns1.example.com', adminEmail: 'admin.example.com', serial: 2026010801, refresh: 3600, retry: 900, expire: 1209600, minimum: 300 },
+                ns: ['ns1.example.com'],
+                settings: { transferACL: [], tsigKeys: [], views: [], rpz: [] },
+                records: [ { id: 6, type: 'PTR', name: '10', ptrdname: 'host-10.example.com', ttl: 3600 } ],
+            },
+        ];
+    });
+    const [selectedZone, setSelectedZone] = useState(() => zones[0]?.name || '');
+    const zone = zones.find(z => z.name === selectedZone) || zones[0];
+
+    const persistZones = (updated) => {
+        setZones(updated);
+        try { localStorage.setItem('dnsZones', JSON.stringify(updated)); } catch {}
+    };
+
+    const addZone = () => {
+        if (isReadOnly) return;
+        const name = prompt('Zone name (e.g., example.com or 1.168.192.in-addr.arpa)');
+        if (!name) return;
+        const type = name.endsWith('.in-addr.arpa') ? 'reverse' : 'forward';
+        if (zones.some(z => z.name === name)) { toast.error('Zone already exists'); return; }
+        const newZone = { name, type, defaultTTL: 3600, soa: { primaryNs: `ns1.${name.replace('.in-addr.arpa','')}`, adminEmail: 'admin.example.com', serial: 2026010801, refresh: 3600, retry: 900, expire: 1209600, minimum: 300 }, ns: [`ns1.${name.replace('.in-addr.arpa','')}`], settings: { transferACL: [], tsigKeys: [], views: [], rpz: [] }, records: [] };
+        const updated = [...zones, newZone];
+        persistZones(updated);
+        setSelectedZone(name);
+        toast.success('Zone added');
+    };
+
+    const updateSOA = (field, val) => {
+        if (isReadOnly) return;
+        const updated = zones.map(z => z.name === zone.name ? { ...z, soa: { ...z.soa, [field]: val } } : z);
+        persistZones(updated);
+    };
+    const addNS = () => {
+        if (isReadOnly) return;
+        const ns = prompt('Add NS host (e.g., ns3.example.com)');
+        if (!ns) return;
+        const updated = zones.map(z => z.name === zone.name ? { ...z, ns: [...z.ns, ns] } : z);
+        persistZones(updated);
+    };
+    const removeNS = (ns) => {
+        if (isReadOnly) return;
+        const updated = zones.map(z => z.name === zone.name ? { ...z, ns: z.ns.filter(x => x !== ns) } : z);
+        persistZones(updated);
+    };
+
+    // Record helpers
+    const validateIPv4 = (ip) => /^((25[0-5]|2[0-4]\d|1?\d?\d)(\.|$)){4}$/.test(ip);
+    const validateIPv6 = (ip) => /^[0-9A-Fa-f:]+$/.test(ip) && ip.includes(':');
+    const validateHostname = (h) => {
+        if (!h || h.length > 253) return false;
+        return h.split('.').every(lbl => /^[A-Za-z0-9-]{1,63}$/.test(lbl) && !lbl.startsWith('-') && !lbl.endsWith('-'));
+    };
+    const hasCnameConflict = (name, type) => {
+        const sameName = zone.records.filter(r => r.name === name);
+        if (type === 'CNAME') return sameName.length > 0; // cannot coexist
+        return sameName.some(r => r.type === 'CNAME');
+    };
+
+    const addRecord = (rec) => {
+        if (isReadOnly) return;
+        // Inline validation
+        if (!rec.name && rec.type !== 'SOA') { toast.error('Name is required'); return; }
+        if (hasCnameConflict(rec.name, rec.type)) { toast.error('CNAME exclusivity violated'); return; }
+        if (rec.ttl && (isNaN(rec.ttl) || rec.ttl < 0)) { toast.error('Invalid TTL'); return; }
+        switch (rec.type) {
+            case 'A': if (!validateIPv4(rec.value)) return toast.error('Invalid IPv4'); break;
+            case 'AAAA': if (!validateIPv6(rec.value)) return toast.error('Invalid IPv6'); break;
+            case 'CNAME': if (!validateHostname(rec.value)) return toast.error('Invalid target hostname'); break;
+            case 'MX': if (!validateHostname(rec.exchange) || isNaN(rec.preference)) return toast.error('Invalid MX'); break;
+            case 'SRV': {
+                if ([rec.priority, rec.weight, rec.port].some(x => isNaN(x))) return toast.error('SRV priority/weight/port required');
+                if (!validateHostname(rec.target)) return toast.error('Invalid SRV target');
+                break;
+            }
+            case 'CAA': {
+                const validTags = ['issue', 'issuewild', 'iodef'];
+                if (isNaN(rec.flag) || !validTags.includes(rec.tag)) return toast.error('Invalid CAA flag/tag');
+                if (!rec.value) return toast.error('CAA value required');
+                break;
+            }
+            case 'PTR': {
+                if (zone.type !== 'reverse') return toast.error('PTR only allowed in reverse zones');
+                if (!rec.ptrdname || !validateHostname(rec.ptrdname)) return toast.error('Invalid PTR domain');
+                if (!/^\d{1,3}$/.test(rec.name)) return toast.error('PTR name should be last octet');
+                break;
+            }
+            default: break;
+        }
+        const withId = { id: Date.now(), ...rec, ttl: rec.ttl ? Number(rec.ttl) : zone.defaultTTL };
+        const updated = zones.map(z => z.name === zone.name ? { ...z, records: [withId, ...z.records] } : z);
+        persistZones(updated);
+        toast.success('Record added');
+    };
+    const deleteRecord = (id) => {
+        if (isReadOnly) return;
+        const updated = zones.map(z => z.name === zone.name ? { ...z, records: z.records.filter(r => r.id !== id) } : z);
+        persistZones(updated);
+    };
+
+    // Step 2: Query tester + logs + cache stats (simple simulation)
+    const [queryName, setQueryName] = useState('www.example.com');
+    const [queryType, setQueryType] = useState('A');
+    const [logs, setLogs] = useState(() => []);
+    const [cache, setCache] = useState(() => ({}));
+    const [cacheStats, setCacheStats] = useState({ queries: 0, hits: 0, misses: 0 });
+    const cacheKey = (q, t) => `${q}|${t}|${selectedZone}`;
+    const resolveQuery = () => {
+        const q = queryName.trim().replace(/\.$/, '');
+        const t = queryType;
+        const key = cacheKey(q, t);
+        let hit = false; let answer = [];
+        if (cache[key]) { hit = true; answer = cache[key]; }
+        else {
+            // naive resolver: exact name match in selected zone
+            const rel = q.endsWith(zone.name) ? q.replace(`.${zone.name}`, '') : q;
+            const nameToMatch = rel === zone.name || rel === '' ? zone.name : rel;
+            answer = zone.records.filter(r => r.name === nameToMatch && r.type === t).map(r => {
+                if (t === 'MX') return `${r.preference} ${r.exchange}`;
+                if (t === 'SRV') return `${r.priority} ${r.weight} ${r.port} ${r.target}`;
+                if (t === 'CAA') return `${r.flag} ${r.tag} "${r.value}"`;
+                if (t === 'PTR') return r.ptrdname;
+                return r.value;
+            });
+            const newCache = { ...cache, [key]: answer };
+            setCache(newCache);
+        }
+        setCacheStats(s => ({ queries: s.queries + 1, hits: s.hits + (hit ? 1 : 0), misses: s.misses + (hit ? 0 : 1) }));
+        const rcode = answer.length ? 'NOERROR' : 'NXDOMAIN';
+        setLogs(prev => [...prev.slice(-99), { ts: new Date().toLocaleTimeString(), client: '127.0.0.1', qname: q, qtype: t, rcode, answer }]);
+        toast.success(hit ? 'Cache hit' : 'Resolved');
+    };
+
+    // Step 3: AXFR ACLs, TSIG, Views, RPZ (UI only, per-zone settings)
+    const updateZoneSettings = (key, payload) => {
+        const updated = zones.map(z => z.name === zone.name ? { ...z, settings: { ...z.settings, [key]: payload } } : z);
+        persistZones(updated);
+    };
+
+    // Record form (inline, dynamic)
+    const [newRec, setNewRec] = useState({ type: 'A', name: '', value: '', ttl: zone?.defaultTTL || 3600 });
+    useEffect(() => { setNewRec(n => ({ ...n, ttl: zone?.defaultTTL || 3600 })); }, [selectedZone]);
+
+    const renderRecordValueInputs = () => {
+        switch (newRec.type) {
+            case 'MX':
+                return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Preference</label>
+                            <input type="number" value={newRec.preference || ''} onChange={e => setNewRec({ ...newRec, preference: Number(e.target.value) })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" placeholder="10" />
+                        </div>
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Exchange</label>
+                            <input value={newRec.exchange || ''} onChange={e => setNewRec({ ...newRec, exchange: e.target.value })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" placeholder="mail.example.com" />
+                        </div>
+                    </div>
+                );
+            case 'SRV':
+                return (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Priority</label>
+                            <input type="number" value={newRec.priority || ''} onChange={e => setNewRec({ ...newRec, priority: Number(e.target.value) })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" />
+                        </div>
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Weight</label>
+                            <input type="number" value={newRec.weight || ''} onChange={e => setNewRec({ ...newRec, weight: Number(e.target.value) })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" />
+                        </div>
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Port</label>
+                            <input type="number" value={newRec.port || ''} onChange={e => setNewRec({ ...newRec, port: Number(e.target.value) })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" />
+                        </div>
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Target</label>
+                            <input value={newRec.target || ''} onChange={e => setNewRec({ ...newRec, target: e.target.value })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" placeholder="_service._proto" />
+                        </div>
+                    </div>
+                );
+            case 'CAA':
+                return (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Flag</label>
+                            <input type="number" value={newRec.flag || ''} onChange={e => setNewRec({ ...newRec, flag: Number(e.target.value) })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" />
+                        </div>
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Tag</label>
+                            <select value={newRec.tag || 'issue'} onChange={e => setNewRec({ ...newRec, tag: e.target.value })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg">
+                                <option>issue</option><option>issuewild</option><option>iodef</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Value</label>
+                            <input value={newRec.value || ''} onChange={e => setNewRec({ ...newRec, value: e.target.value })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" placeholder="letsencrypt.org" />
+                        </div>
+                    </div>
+                );
+            case 'PTR':
+                return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">PTR Name (last octet)</label>
+                            <input value={newRec.name || ''} onChange={e => setNewRec({ ...newRec, name: e.target.value })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" placeholder="10" />
+                        </div>
+                        <div>
+                            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">PTR Domain</label>
+                            <input value={newRec.ptrdname || ''} onChange={e => setNewRec({ ...newRec, ptrdname: e.target.value })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" placeholder="host-10.example.com" />
+                        </div>
+                    </div>
+                );
+            default:
+                return (
+                    <div>
+                        <label className="text-sm font-bold text-gray-700 dark:text-gray-300 block mb-2">Value</label>
+                        <input value={newRec.value || ''} onChange={e => setNewRec({ ...newRec, value: e.target.value })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" placeholder={newRec.type === 'A' ? '192.0.2.1' : (newRec.type === 'AAAA' ? '2001:db8::1' : 'target.example.com')} />
+                    </div>
+                );
+        }
+    };
+
     return (
         <div className="space-y-6">
-            <GlassPanel className="p-4 flex justify-between items-center">
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">DNS Records</h3>
-                {!isReadOnly && (
-                    <button onClick={() => setShowAddForm(!showAddForm)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold hover:opacity-90 transition-opacity">
-                        <Icon name={showAddForm ? 'x' : 'plus'} className="w-5 h-5" />
-                        <span>{showAddForm ? 'Cancel' : 'Add Record'}</span>
-                    </button>
-                )}
+            <GlassPanel className="p-4 flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">DNS Zones</h3>
+                    {!isReadOnly && (
+                        <button onClick={addZone} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold hover:opacity-90">
+                            <Icon name="plus" className="w-5 h-5" /> Add Zone
+                        </button>
+                    )}
+                </div>
+                <div className="flex gap-3 items-center flex-wrap">
+                    <label className="text-sm text-gray-600 dark:text-gray-400">Zone</label>
+                    <select value={selectedZone} onChange={e => setSelectedZone(e.target.value)} className="px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20">
+                        {zones.map(z => <option key={z.name} value={z.name}>{z.name} ({z.type})</option>)}
+                    </select>
+                    <div className="ml-auto text-xs text-gray-500">Default TTL</div>
+                    <input type="number" value={zone.defaultTTL} disabled className="px-2 py-1 rounded bg-gray-100 dark:bg-black/30 border border-cyan-500/20 w-24" />
+                </div>
             </GlassPanel>
-            {showAddForm && <DnsRecordForm onSave={handleSave} onCancel={() => setShowAddForm(false)} />}
+
+            <GlassPanel className="p-4">
+                <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">SOA</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <label className="block text-sm text-gray-600">Primary NS</label>
+                        <input disabled={isReadOnly} value={zone.soa.primaryNs} onChange={e => updateSOA('primaryNs', e.target.value)} className="w-full px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+                    </div>
+                    <div>
+                        <label className="block text-sm text-gray-600">Admin Email (dot-separated)</label>
+                        <input disabled={isReadOnly} value={zone.soa.adminEmail} onChange={e => updateSOA('adminEmail', e.target.value)} className="w-full px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+                    </div>
+                    <div>
+                        <label className="block text-sm text-gray-600">Serial</label>
+                        <input type="number" disabled={isReadOnly} value={zone.soa.serial} onChange={e => updateSOA('serial', Number(e.target.value))} className="w-full px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+                    </div>
+                    {['refresh','retry','expire','minimum'].map(k => (
+                        <div key={k}>
+                            <label className="block text-sm text-gray-600 capitalize">{k}</label>
+                            <input type="number" disabled={isReadOnly} value={zone.soa[k]} onChange={e => updateSOA(k, Number(e.target.value))} className="w-full px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+                        </div>
+                    ))}
+                </div>
+                <div className="mt-4">
+                    <h5 className="font-semibold mb-2">NS Records</h5>
+                    <div className="flex flex-wrap gap-2 items-center">
+                        {zone.ns.map(ns => (
+                            <span key={ns} className="px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/20 text-sm flex items-center gap-2">
+                                {ns}
+                                {!isReadOnly && <button onClick={() => removeNS(ns)} className="text-red-500">✕</button>}
+                            </span>
+                        ))}
+                        {!isReadOnly && <button onClick={addNS} className="px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 text-sm">+ Add NS</button>}
+                    </div>
+                </div>
+            </GlassPanel>
+
+            {!isReadOnly && (
+                <GlassPanel className="p-4">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Add Record</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Type</label>
+                            <select value={newRec.type} onChange={e => setNewRec({ type: e.target.value, name: '', value: '', ttl: zone.defaultTTL })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg">
+                                <option>A</option><option>AAAA</option><option>CNAME</option><option>MX</option><option>TXT</option><option>SRV</option><option>CAA</option><option>PTR</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Name</label>
+                            <input disabled={newRec.type==='PTR'} value={newRec.name || ''} onChange={e => setNewRec({ ...newRec, name: e.target.value })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" placeholder={newRec.type==='CNAME'?'www':'@ or host'} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">TTL</label>
+                            <input type="number" value={newRec.ttl} onChange={e => setNewRec({ ...newRec, ttl: Number(e.target.value) })} className="w-full p-3 bg-white dark:bg-black/30 border border-cyan-500/20 rounded-lg" />
+                        </div>
+                    </div>
+                    <div className="mt-3">{renderRecordValueInputs()}</div>
+                    <div className="mt-4">
+                        <button onClick={() => addRecord(newRec)} className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold hover:opacity-90">Save Record</button>
+                    </div>
+                </GlassPanel>
+            )}
+
             <GlassPanel className="p-4 overflow-x-auto">
+                <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Records ({zone.name})</h4>
                 <table className="w-full text-left table-auto">
                     <thead>
-                        <tr className="border-b border-cyan-500/20 dark:border-cyan-300/20"><th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Type</th><th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Name</th><th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Value</th><th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hidden sm:table-cell">TTL</th>{!isReadOnly && <th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>}</tr>
+                        <tr className="border-b border-cyan-500/20 dark:border-cyan-300/20">
+                            <th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Type</th>
+                            <th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Name</th>
+                            <th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Value</th>
+                            <th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hidden sm:table-cell">TTL</th>
+                            {!isReadOnly && <th className="p-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>}
+                        </tr>
                     </thead>
                     <tbody>
-                        {records.map((record) => (
-                            <tr key={record.id} className="border-b border-cyan-500/10 dark:border-cyan-300/10 hover:bg-cyan-500/10 transition-colors">
-                                <td className="p-3 text-cyan-600 dark:text-cyan-300 font-mono text-sm">{record.type}</td><td className="p-3 text-gray-800 dark:text-gray-200 font-mono text-sm break-all">{record.name}</td><td className="p-3 text-gray-600 dark:text-gray-300 font-mono text-sm break-all">{record.value}</td><td className="p-3 text-gray-600 dark:text-gray-300 hidden sm:table-cell">{record.ttl}</td>
-                                {!isReadOnly && <td className="p-3"><button onClick={() => onDeleteRecord(record.id)} className="p-2 text-red-400 hover:bg-red-500/20 rounded-full transition-colors"><Icon name="trash" className="w-5 h-5"/></button></td>}
-                            </tr>
-                        ))}
+                        {zone.records.map((r) => {
+                            let valueStr = r.value;
+                            if (r.type === 'MX') valueStr = `${r.preference} ${r.exchange}`;
+                            if (r.type === 'SRV') valueStr = `${r.priority} ${r.weight} ${r.port} ${r.target}`;
+                            if (r.type === 'CAA') valueStr = `${r.flag} ${r.tag} "${r.value}"`;
+                            if (r.type === 'PTR') valueStr = r.ptrdname;
+                            return (
+                                <tr key={r.id} className="border-b border-cyan-500/10 dark:border-cyan-300/10 hover:bg-cyan-500/10 transition-colors">
+                                    <td className="p-3 text-cyan-600 dark:text-cyan-300 font-mono text-sm">{r.type}</td>
+                                    <td className="p-3 text-gray-800 dark:text-gray-200 font-mono text-sm break-all">{r.name}</td>
+                                    <td className="p-3 text-gray-600 dark:text-gray-300 font-mono text-sm break-all">{valueStr}</td>
+                                    <td className="p-3 text-gray-600 dark:text-gray-300 hidden sm:table-cell">{r.ttl}</td>
+                                    {!isReadOnly && (
+                                        <td className="p-3"><button onClick={() => deleteRecord(r.id)} className="p-2 text-red-400 hover:bg-red-500/20 rounded-full transition-colors"><Icon name="trash" className="w-5 h-5"/></button></td>
+                                    )}
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </GlassPanel>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <GlassPanel className="p-4 lg:col-span-2">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Query Tester</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                        <div className="md:col-span-2">
+                            <label className="block text-sm text-gray-600">QNAME</label>
+                            <input value={queryName} onChange={e => setQueryName(e.target.value)} className="w-full px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" placeholder="www.example.com" />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-600">QTYPE</label>
+                            <select value={queryType} onChange={e => setQueryType(e.target.value)} className="w-full px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20">
+                                {['A','AAAA','CNAME','MX','TXT','SRV','CAA','PTR'].map(t => <option key={t}>{t}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <button onClick={resolveQuery} className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold hover:opacity-90">Resolve</button>
+                        </div>
+                    </div>
+                    <div className="mt-4 max-h-56 overflow-y-auto text-sm font-mono">
+                        {logs.slice().reverse().map((l, i) => (
+                            <div key={i} className="py-1 border-b border-cyan-500/10">
+                                <span className="text-gray-500">{l.ts}</span> • <span className="text-cyan-600 dark:text-cyan-300">{l.client}</span> • {l.qname} {l.qtype} → <span className={l.rcode==='NOERROR'?'text-green-600 dark:text-green-300':'text-red-600 dark:text-red-300'}>{l.rcode}</span>
+                                {l.answer.length ? <div className="text-gray-700 dark:text-gray-300">{l.answer.join(' | ')}</div> : null}
+                            </div>
+                        ))}
+                    </div>
+                </GlassPanel>
+                <GlassPanel className="p-4">
+                    <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Cache Stats</h4>
+                    <div className="space-y-2 text-sm">
+                        <div className="flex justify-between"><span>Total Queries</span><span className="font-mono">{cacheStats.queries}</span></div>
+                        <div className="flex justify-between"><span>Cache Hits</span><span className="font-mono text-green-600 dark:text-green-300">{cacheStats.hits}</span></div>
+                        <div className="flex justify-between"><span>Cache Misses</span><span className="font-mono text-yellow-600 dark:text-yellow-300">{cacheStats.misses}</span></div>
+                    </div>
+                </GlassPanel>
+            </div>
+
+            <GlassPanel className="p-4">
+                <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Zone Security & Policy</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h5 className="font-semibold mb-2">AXFR/IXFR ACL</h5>
+                        <AclListEditor items={zone.settings.transferACL} placeholder="IP/CIDR (e.g., 192.168.1.1)" onChange={v => updateZoneSettings('transferACL', v)} disabled={isReadOnly} />
+                    </div>
+                    <div>
+                        <h5 className="font-semibold mb-2">TSIG Keys</h5>
+                        <TsigEditor items={zone.settings.tsigKeys} onChange={v => updateZoneSettings('tsigKeys', v)} disabled={isReadOnly} />
+                    </div>
+                    <div>
+                        <h5 className="font-semibold mb-2">Views</h5>
+                        <ViewsEditor items={zone.settings.views} onChange={v => updateZoneSettings('views', v)} disabled={isReadOnly} />
+                    </div>
+                    <div>
+                        <h5 className="font-semibold mb-2">RPZ (Response Policy)</h5>
+                        <RpzEditor items={zone.settings.rpz} onChange={v => updateZoneSettings('rpz', v)} disabled={isReadOnly} />
+                    </div>
+                </div>
+            </GlassPanel>
+        </div>
+    );
+};
+
+// Editors for Step 3 (simple UI components)
+const AclListEditor = ({ items, onChange, placeholder, disabled }) => {
+    const [value, setValue] = useState('');
+    const remove = (i) => { const next = items.filter((_, idx) => idx !== i); onChange(next); };
+    const add = () => { if (!value.trim()) return; onChange([...(items||[]), value.trim()]); setValue(''); };
+    return (
+        <div>
+            <div className="flex gap-2 mb-2">
+                <input disabled={disabled} value={value} onChange={e => setValue(e.target.value)} placeholder={placeholder} className="flex-1 px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+                <button disabled={disabled} onClick={add} className="px-3 py-2 rounded bg-green-500 text-white disabled:opacity-50">Add</button>
+            </div>
+            <div className="space-y-1">
+                {(items||[]).map((v, i) => (
+                    <div key={i} className="flex justify-between items-center px-3 py-2 rounded bg-cyan-500/5 border border-cyan-500/20 text-sm">
+                        <span>{v}</span>
+                        <button disabled={disabled} onClick={() => remove(i)} className="text-red-500">Remove</button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const TsigEditor = ({ items = [], onChange, disabled }) => {
+    const [form, setForm] = useState({ name: '', algo: 'hmac-sha256', secret: '' });
+    const add = () => {
+        if (!form.name || !form.secret) { toast.error('TSIG name and secret required'); return; }
+        onChange([ ...items, { ...form } ]);
+        setForm({ name: '', algo: 'hmac-sha256', secret: '' });
+    };
+    const remove = (idx) => onChange(items.filter((_, i) => i !== idx));
+    return (
+        <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <input disabled={disabled} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Key name" className="px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+                <select disabled={disabled} value={form.algo} onChange={e => setForm({ ...form, algo: e.target.value })} className="px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20">
+                    <option>hmac-sha256</option><option>hmac-sha1</option><option>hmac-sha512</option>
+                </select>
+                <input disabled={disabled} value={form.secret} onChange={e => setForm({ ...form, secret: e.target.value })} placeholder="Base64 secret" className="px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+            </div>
+            <button disabled={disabled} onClick={add} className="px-3 py-2 rounded bg-green-500 text-white disabled:opacity-50">Add TSIG</button>
+            <div className="space-y-1 mt-2">
+                {items.map((k, i) => (
+                    <div key={i} className="flex justify-between items-center px-3 py-2 rounded bg-cyan-500/5 border border-cyan-500/20 text-sm">
+                        <span>{k.name} • {k.algo}</span>
+                        <button disabled={disabled} onClick={() => remove(i)} className="text-red-500">Remove</button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const ViewsEditor = ({ items = [], onChange, disabled }) => {
+    const [form, setForm] = useState({ name: '', clients: '' });
+    const add = () => { if (!form.name || !form.clients) return toast.error('View name and clients required'); onChange([ ...items, { ...form } ]); setForm({ name: '', clients: '' }); };
+    const remove = (idx) => onChange(items.filter((_, i) => i !== idx));
+    return (
+        <div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <input disabled={disabled} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="View name" className="px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+                <input disabled={disabled} value={form.clients} onChange={e => setForm({ ...form, clients: e.target.value })} placeholder="Client subnets (e.g., 10.0.0.0/8)" className="px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+                <button disabled={disabled} onClick={add} className="px-3 py-2 rounded bg-green-500 text-white disabled:opacity-50">Add View</button>
+            </div>
+            <div className="space-y-1 mt-2">
+                {items.map((v, i) => (
+                    <div key={i} className="flex justify-between items-center px-3 py-2 rounded bg-cyan-500/5 border border-cyan-500/20 text-sm">
+                        <span>{v.name} • {v.clients}</span>
+                        <button disabled={disabled} onClick={() => remove(i)} className="text-red-500">Remove</button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const RpzEditor = ({ items = [], onChange, disabled }) => {
+    const [form, setForm] = useState({ pattern: '', action: 'NXDOMAIN', target: '' });
+    const add = () => { if (!form.pattern) return toast.error('Pattern required'); onChange([ ...items, { ...form } ]); setForm({ pattern: '', action: 'NXDOMAIN', target: '' }); };
+    const remove = (idx) => onChange(items.filter((_, i) => i !== idx));
+    return (
+        <div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <input disabled={disabled} value={form.pattern} onChange={e => setForm({ ...form, pattern: e.target.value })} placeholder="domain or wildcard (e.g., *.bad.com)" className="px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+                <select disabled={disabled} value={form.action} onChange={e => setForm({ ...form, action: e.target.value })} className="px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20">
+                    <option>NXDOMAIN</option><option>Redirect</option>
+                </select>
+                <input disabled={disabled || form.action!=='Redirect'} value={form.target} onChange={e => setForm({ ...form, target: e.target.value })} placeholder="Redirect target" className="px-3 py-2 rounded bg-white dark:bg-black/30 border border-cyan-500/20" />
+            </div>
+            <button disabled={disabled} onClick={add} className="mt-2 px-3 py-2 rounded bg-green-500 text-white disabled:opacity-50">Add Policy</button>
+            <div className="space-y-1 mt-2">
+                {items.map((p, i) => (
+                    <div key={i} className="flex justify-between items-center px-3 py-2 rounded bg-cyan-500/5 border border-cyan-500/20 text-sm">
+                        <span>{p.pattern} • {p.action}{p.action==='Redirect' && p.target ? ` → ${p.target}` : ''}</span>
+                        <button disabled={disabled} onClick={() => remove(i)} className="text-red-500">Remove</button>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
@@ -3450,12 +3968,12 @@ const DeviceGroupsModal = ({ onClose, devices, onUpdateGroups }) => {
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onMouseDown={handleOverlayMouseDown}>
-            <GlassPanel className="w-full max-w-5xl max-h-[80vh] overflow-y-auto" onMouseDown={e => e.stopPropagation()}>
-                <div className="p-4 border-b border-cyan-500/20 flex justify-between items-center sticky top-0 bg-inherit">
+            <GlassPanel className="w-full max-w-5xl max-h-[80vh] flex flex-col" onMouseDown={e => e.stopPropagation()}>
+                <div className="p-4 border-b border-cyan-500/20 flex justify-between items-center flex-shrink-0">
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Device Groups & Tags</h2>
                     <button onClick={onClose} className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">✕</button>
                 </div>
-                <div className="p-4 border-b border-cyan-500/20">
+                <div className="p-4 border-b border-cyan-500/20 flex-shrink-0">
                     <div className="flex gap-3 flex-wrap">
                         <input
                             type="text"
@@ -3480,7 +3998,7 @@ const DeviceGroupsModal = ({ onClose, devices, onUpdateGroups }) => {
                         </button>
                     </div>
                 </div>
-                <div className="p-4 space-y-4">
+                <div className="p-4 space-y-4 overflow-y-auto flex-1">
                     {groups.map(group => (
                         <div key={group.id} className="border border-cyan-500/20 rounded p-4">
                             <div className="flex items-center justify-between mb-3">
@@ -3955,7 +4473,7 @@ const AdvancedNetworkingModal = ({ onClose, device }) => {
 };
 
 const SettingsView = ({ onSave, currentSettings, onThemeChange, userRole = 'admin', devices = [] }) => {
-    const [openSections, setOpenSections] = useState({ global: true, users: false, logs: false, tools: true, security: false });
+    const [openSections, setOpenSections] = useState({ global: true, users: false, logs: false, tools: true, security: false, groupPolicies: true });
     const [localSettings, setLocalSettings] = useState({
         timezone: currentSettings.timezone,
         ntpServer: currentSettings.ntpServer
@@ -3979,6 +4497,28 @@ const SettingsView = ({ onSave, currentSettings, onThemeChange, userRole = 'admi
     const [showDeviceGroups, setShowDeviceGroups] = useState(false);
     const [showFirmwareRepo, setShowFirmwareRepo] = useState(false);
     const [showMaintenance, setShowMaintenance] = useState(false);
+    // Groups & Policies state
+    const [groups, setGroups] = useState(() => {
+        try { const saved = localStorage.getItem('deviceGroups'); if (saved) return JSON.parse(saved); } catch {}
+        return [ { id: 1, name: 'Core Network', color: 'blue', deviceIds: [] } ];
+    });
+    const [newGroup, setNewGroup] = useState({ name: '', color: 'blue' });
+    const colors = ['blue', 'green', 'purple', 'orange', 'red', 'pink', 'indigo', 'teal'];
+    const persistGroups = (updated) => { setGroups(updated); try { localStorage.setItem('deviceGroups', JSON.stringify(updated)); } catch {} };
+    const addGroup = () => { if (!newGroup.name.trim()) { toast.error('Group name required'); return; } const g = { id: Date.now(), name: newGroup.name.trim(), color: newGroup.color, deviceIds: [] }; const updated = [...groups, g]; persistGroups(updated); setNewGroup({ name: '', color: 'blue' }); toast.success('Group added'); };
+    const deleteGroup = (id) => { const updated = groups.filter(g => g.id !== id); persistGroups(updated); };
+    const handleGroupsUpdated = (updated) => { persistGroups(updated); };
+    // Policies
+    const [policies, setPolicies] = useState(() => { try { const saved = localStorage.getItem('globalPolicies'); if (saved) return JSON.parse(saved); } catch {}; return []; });
+    const [editingPolicy, setEditingPolicy] = useState(null);
+    const [policyForm, setPolicyForm] = useState({ name: '', description: '', groupIds: [], enabled: true });
+    const persistPolicies = (updated) => { setPolicies(updated); try { localStorage.setItem('globalPolicies', JSON.stringify(updated)); } catch {} };
+    const startAddPolicy = () => { setEditingPolicy(null); setPolicyForm({ name: '', description: '', groupIds: [], enabled: true }); };
+    const startEditPolicy = (p) => { setEditingPolicy(p); setPolicyForm({ name: p.name, description: p.description || '', groupIds: p.groupIds || [], enabled: p.enabled }); };
+    const togglePolicyEnabled = (id) => { const updated = policies.map(p => p.id === id ? { ...p, enabled: !p.enabled } : p); persistPolicies(updated); };
+    const deletePolicy = (id) => { persistPolicies(policies.filter(p => p.id !== id)); };
+    const movePolicy = (index, dir) => { const updated = [...policies]; if (dir === 'up' && index > 0) { [updated[index], updated[index-1]] = [updated[index-1], updated[index]]; } else if (dir==='down' && index < updated.length-1) { [updated[index], updated[index+1]] = [updated[index+1], updated[index]]; } persistPolicies(updated); };
+    const savePolicy = () => { if (!policyForm.name.trim()) { toast.error('Policy name required'); return; } if (editingPolicy) { const updated = policies.map(p => p.id === editingPolicy.id ? { ...p, ...policyForm } : p); persistPolicies(updated); setEditingPolicy(null); toast.success('Policy updated'); } else { const p = { id: Date.now(), ...policyForm }; persistPolicies([ ...policies, p ]); toast.success('Policy added'); } setPolicyForm({ name: '', description: '', groupIds: [], enabled: true }); };
 
     const toggleSection = (section) => {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -4154,7 +4694,7 @@ const SettingsView = ({ onSave, currentSettings, onThemeChange, userRole = 'admi
 
             {showSyslog && <SyslogViewerModal onClose={() => setShowSyslog(false)} devices={devices} />}
             {showConfigBackup && <ConfigBackupModal onClose={() => setShowConfigBackup(false)} devices={devices} />}
-            {showDeviceGroups && <DeviceGroupsModal onClose={() => setShowDeviceGroups(false)} devices={devices} />}
+            {showDeviceGroups && <DeviceGroupsModal onClose={() => setShowDeviceGroups(false)} devices={devices} onUpdateGroups={handleGroupsUpdated} />}
             {showFirmwareRepo && <FirmwareRepositoryModal onClose={() => setShowFirmwareRepo(false)} />}
             {showMaintenance && <MaintenanceModeModal onClose={() => setShowMaintenance(false)} devices={devices} />}
             <div className="space-y-6">
@@ -4285,6 +4825,100 @@ const SettingsView = ({ onSave, currentSettings, onThemeChange, userRole = 'admi
                     </div>
                  </div>
               </SettingsSection>
+
+              {userRole === 'admin' && (
+                <SettingsSection title="Groups & Policies" isOpen={openSections.groupPolicies} onToggle={() => toggleSection('groupPolicies')}>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <GlassPanel className="p-4 flex flex-col max-h-[500px]">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Device Groups</h3>
+                                <button onClick={() => setShowDeviceGroups(true)} className="px-3 py-1 rounded bg-purple-500/20 text-purple-600 dark:text-purple-400 hover:bg-purple-500/30 text-sm">Advanced</button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                                <input value={newGroup.name} onChange={e => setNewGroup({ ...newGroup, name: e.target.value })} placeholder="Group name" className="p-2 bg-white dark:bg-black/30 border border-cyan-500/20 rounded" />
+                                <select value={newGroup.color} onChange={e => setNewGroup({ ...newGroup, color: e.target.value })} className="p-2 bg-white dark:bg-black/30 border border-cyan-500/20 rounded">
+                                    {colors.map(c => <option key={c}>{c}</option>)}
+                                </select>
+                                <button onClick={addGroup} className="px-3 py-2 rounded bg-green-500 text-white">Add Group</button>
+                            </div>
+                            <div className="mt-4 space-y-2 overflow-y-auto flex-1">
+                                {groups.length === 0 ? (
+                                    <p className="text-gray-600 dark:text-gray-400 text-sm">No groups yet.</p>
+                                ) : (
+                                    groups.map(g => (
+                                        <div key={g.id} className="flex items-center justify-between px-3 py-2 rounded bg-cyan-500/5 border border-cyan-500/20">
+                                            <div className="flex items-center gap-2">
+                                                <span className="inline-block w-3 h-3 rounded" style={{ backgroundColor: '#3b82f6' }}></span>
+                                                <span className="font-semibold text-gray-800 dark:text-gray-200">{g.name}</span>
+                                                <span className="text-xs text-gray-500">({g.deviceIds?.length || 0} devices)</span>
+                                            </div>
+                                            <button onClick={() => deleteGroup(g.id)} className="text-red-500">Remove</button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </GlassPanel>
+
+                        <GlassPanel className="p-4 flex flex-col max-h-[500px]">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Policies</h3>
+                                <button onClick={startAddPolicy} className="px-3 py-1 rounded bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:bg-blue-500/30 text-sm">New</button>
+                            </div>
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <input value={policyForm.name} onChange={e => setPolicyForm({ ...policyForm, name: e.target.value })} placeholder="Policy name" className="p-2 bg-white dark:bg-black/30 border border-cyan-500/20 rounded" />
+                                    <input value={policyForm.description} onChange={e => setPolicyForm({ ...policyForm, description: e.target.value })} placeholder="Description (optional)" className="p-2 bg-white dark:bg-black/30 border border-cyan-500/20 rounded" />
+                                </div>
+                                <div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Assign to Groups</div>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                                        {groups.map(g => (
+                                            <label key={g.id} className="flex items-center gap-2 text-sm">
+                                                <input type="checkbox" checked={policyForm.groupIds.includes(g.id)} onChange={e => {
+                                                    const checked = e.target.checked;
+                                                    setPolicyForm(p => ({ ...p, groupIds: checked ? [...p.groupIds, g.id] : p.groupIds.filter(id => id !== g.id) }));
+                                                }} />
+                                                <span>{g.name}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <label className="text-sm text-gray-600 dark:text-gray-400">Enabled</label>
+                                    <ToggleSwitch enabled={policyForm.enabled} onChange={() => setPolicyForm(p => ({ ...p, enabled: !p.enabled }))} />
+                                    <button onClick={savePolicy} className="ml-auto px-3 py-2 rounded bg-gradient-to-r from-cyan-500 to-blue-600 text-white">{editingPolicy ? 'Update' : 'Save'}</button>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 flex-1 flex flex-col min-h-0">
+                                <h4 className="font-semibold mb-2">Defined Policies</h4>
+                                <div className="space-y-2 overflow-y-auto flex-1">
+                                    {policies.length === 0 ? (
+                                        <p className="text-gray-600 dark:text-gray-400 text-sm">No policies defined.</p>
+                                    ) : (
+                                        policies.map((p, idx) => (
+                                            <div key={p.id} className="flex items-center justify-between px-3 py-2 rounded bg-cyan-500/5 border border-cyan-500/20 text-sm">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-mono text-cyan-600 dark:text-cyan-300">{idx+1}</span>
+                                                    <span className="font-semibold">{p.name}</span>
+                                                    <span className="text-gray-500">({p.groupIds?.length || 0} groups)</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <ToggleSwitch enabled={p.enabled} onChange={() => togglePolicyEnabled(p.id)} />
+                                                    <button onClick={() => movePolicy(idx, 'up')} className="p-1 hover:bg-cyan-500/20 rounded"><Icon name="arrowUp" className="w-4 h-4"/></button>
+                                                    <button onClick={() => movePolicy(idx, 'down')} className="p-1 hover:bg-cyan-500/20 rounded"><Icon name="arrowDown" className="w-4 h-4"/></button>
+                                                    <button onClick={() => startEditPolicy(p)} className="p-1 hover:bg-blue-500/20 rounded"><Icon name="edit" className="w-4 h-4"/></button>
+                                                    <button onClick={() => deletePolicy(p.id)} className="p-1 hover:bg-red-500/20 rounded"><Icon name="trash" className="w-4 h-4"/></button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </GlassPanel>
+                    </div>
+                </SettingsSection>
+              )}
             </div>
         </>
     );
